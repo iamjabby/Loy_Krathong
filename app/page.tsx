@@ -133,6 +133,7 @@ export default function Home() {
   const [marked, setMarked] = useState<Set<number>>(new Set([12]));
   const [fortune, setFortune] = useState("");
   const [toast, setToast] = useState("");
+  const [pendingMobileImage, setPendingMobileImage] = useState<File | null>(null);
   const [gameScreen, setGameScreen] = useState<GameScreen>("board");
   const [letterOpening, setLetterOpening] = useState(false);
   const lines = useMemo(() => getLines(marked), [marked]);
@@ -148,6 +149,7 @@ export default function Home() {
     setBoard(cards);
     setMarked(new Set([12]));
     setFortune("");
+    setPendingMobileImage(null);
     setGameScreen("board");
     setLetterOpening(false);
   }
@@ -174,6 +176,40 @@ export default function Home() {
       else next.add(index);
       return next;
     });
+  }
+
+  function isMobileDevice() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+
+  function openMobileImage() {
+    if (!pendingMobileImage) return;
+    const url = URL.createObjectURL(pendingMobileImage);
+    const preview = window.open(url, "_blank");
+    if (!preview) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.click();
+    }
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  }
+
+  function shareMobileImage() {
+    if (!pendingMobileImage) return;
+    const shareData = { files: [pendingMobileImage], title: pendingMobileImage.name };
+    if (navigator.share && navigator.canShare?.({ files: [pendingMobileImage] })) {
+      void navigator.share(shareData).catch((error: unknown) => {
+        if (error instanceof DOMException && error.name !== "AbortError") {
+          setToast("แชร์ไม่สำเร็จ ลองแตะ “เปิดภาพ” เพื่อบันทึกแทน");
+          window.setTimeout(() => setToast(""), 4000);
+        }
+      });
+      return;
+    }
+    openMobileImage();
   }
 
   async function downloadBoard() {
@@ -341,10 +377,25 @@ export default function Home() {
       }
     });
     drawCenteredText(ctx, "✦ made by piesaran official ✦", 1472, '500 20px "Noto Sans Thai", sans-serif', "#f6dfae");
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+    if (!blob) {
+      setToast("สร้างภาพไม่สำเร็จ ลองกดดาวน์โหลดอีกครั้งนะ");
+      window.setTimeout(() => setToast(""), 3000);
+      return;
+    }
+    const filename = `loy-krathong-bingo-${player}.png`;
+    if (isMobileDevice()) {
+      setPendingMobileImage(new File([blob], filename, { type: "image/png" }));
+      setToast("ภาพพร้อมแล้ว เลือกวิธีบันทึกด้านล่างได้เลย ✨");
+      window.setTimeout(() => setToast(""), 4000);
+      return;
+    }
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.download = `loy-krathong-bingo-${player}.png`;
-    link.href = canvas.toDataURL("image/png");
+    link.download = filename;
+    link.href = url;
     link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     setToast("บันทึกบิงโกของคุณเรียบร้อยแล้ว ✨");
     window.setTimeout(() => setToast(""), 2400);
   }
@@ -355,6 +406,7 @@ export default function Home() {
     setMarked(new Set());
     setFortune("");
     setName("");
+    setPendingMobileImage(null);
   }
 
   return (
@@ -529,6 +581,15 @@ export default function Home() {
           <div className="result-actions">
             <button className="download-button" onClick={downloadBoard}>ดาวน์โหลดบิงโกพร้อมคำทำนาย </button>
           </div>
+          {pendingMobileImage && (
+            <div className="mobile-save-panel">
+              <p>ภาพพร้อมแล้ว แตะ “แชร์ / บันทึกภาพ” แล้วเลือกแอปหรือที่จัดเก็บจากเมนูที่เปิดขึ้น</p>
+              <div>
+                <button className="download-button" onClick={shareMobileImage}>แชร์ / บันทึกภาพ</button>
+                <button className="reset-button" onClick={openMobileImage}>เปิดภาพ</button>
+              </div>
+            </div>
+          )}
         </section>
       )}
       <footer>

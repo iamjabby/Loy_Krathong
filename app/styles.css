@@ -111,6 +111,10 @@
 .fortune-letter p { color: #344c55; font: 600 16px/1.8 'Noto Sans Thai',sans-serif; margin: 7px auto 0; max-width: 660px; }
 .result-actions { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; }
 .result-actions .download-button { min-height: 46px; }
+.mobile-save-panel { max-width: 560px; margin: 14px auto 0; padding: 14px 16px; border: 1px solid #e5c88c; border-radius: 14px; background: #f5ead0; text-align: center; }
+.mobile-save-panel p { margin: 0 0 12px; color: #50645e; font-size: 13px; line-height: 1.7; }
+.mobile-save-panel > div { display: flex; justify-content: center; gap: 10px; }
+.mobile-save-panel button { min-height: 44px; }
 @keyframes free-orbit-pulse { 0%,100% { transform: scale(.94) rotate(0); opacity: .55; } 50% { transform: scale(1.06) rotate(14deg); opacity: 1; } }
 
 @media (max-width: 600px) {
@@ -125,6 +129,8 @@
   .fortune-letter p { font-size: 13px; }
   .result-actions { flex-direction: column; }
   .result-actions > button { width: 100%; min-height: 46px; }
+  .mobile-save-panel > div { flex-direction: column; }
+  .mobile-save-panel button { width: 100%; }
 }
 
 .free-art:before, .result-cell.result-free:before { display: none; }
