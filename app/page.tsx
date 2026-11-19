@@ -340,7 +340,7 @@ export default function Home() {
         ctx.stroke();
       }
     });
-    drawCenteredText(ctx, "ขอให้พบเจอแต่เรื่องดี ๆ นะค้าบบบบ", 1472, '500 20px "Noto Sans Thai", sans-serif', "#f6dfae");
+    drawCenteredText(ctx, "✦ made by piesaran official ✦", 1472, '500 20px "Noto Sans Thai", sans-serif', "#f6dfae");
     const link = document.createElement("a");
     link.download = `loy-krathong-bingo-${player}.png`;
     link.href = canvas.toDataURL("image/png");
